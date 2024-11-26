@@ -44,7 +44,9 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with:
         directory: ./terraform
-        skip-checks: CKV2_AWS_5,CKV2_AWS_12
+        skip-checks: 
+          -CKV2_AWS_5
+          -CKV2_AWS_12
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
