@@ -1,0 +1,46 @@
+name: Terraform Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read   
+  id-token: write   
+  actions: write   
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.6
+
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ./terraform
+
+    - name: Checkov Security Scan
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: ./terraform
+
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
