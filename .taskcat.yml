@@ -1,0 +1,15 @@
+project:
+  name: my-vpc-project
+  regions:
+    - us-east-1 
+tests:
+  default:
+    template: cloudformation.yml
+    parameters:
+      VPCName: MyVPC
+      PublicSubnetCIDR: 10.0.1.0/24
+      PrivateSubnetCIDR: 10.0.2.0/24
+      InstanceType: t2.micro
+      SSHLocation: 0.0.0.0/0
+    regions:
+      - us-east-1
