@@ -6,41 +6,72 @@ CloudFormation, GitHub Actions, AWS CodePipeline và Jenkins
 với AWS CodePipeline
 - Sử dụng Jenkins để quản lý quy trình CI/CD cho ứng dụng microservices 
 
-## 1. Cấu hình VPC bằng Terraform 
-  + Setup các tài nguyên cần thiết:
-    + Cài đặt Terraform: [Terraform installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli).  
-    + Cài đặt AWS CLI. 
-    + Cấu hình aws configure với AWS Access Key ID, AWS Secret Access Key, Default region name (us-east-1)
+## **1. Triển khai hạ tầng AWS sử dụng Terraform và tự động hóa quy trình với GitHub Actions (3 điểm)**
 
-  + Chạy lệnh:
+### **Các bước thực hiện**
+1. **Dùng Terraform để triển khai hạ tầng AWS**:
+   - Triển khai các dịch vụ AWS sau:
+     - **VPC** (Virtual Private Cloud)
+     - **Route Tables**
+     - **NAT Gateway**
+     - **EC2 Instances**
+     - **Security Groups**
+   - Sử dụng tệp `main.tf` trong thư mục `terraform/` để định nghĩa các tài nguyên.
 
-    Khởi tạo terraform
-    ```bash
-    terraform init
-    ```
-    Tạo kế hoạch thực thi terraform
-    ```bash
-    terraform plan
-    ```
-    Thực thi code terraform
-    ```bash
-    terraform aplly
-    ```
-  + Lưu ý: Dọn dẹp 
+2. **Tự động hóa triển khai với GitHub Actions**:
+   - Tạo file pipeline `terraform-pipeline.yml` trong `.github/workflows/`.
+   - Pipeline bao gồm các bước:
+     - Checkout mã nguồn từ GitHub.
+     - Thiết lập môi trường Terraform.
+     - Chạy lệnh `terraform init`, `terraform plan`, và `terraform apply`.
 
-    Sau khi triển khai và kiểm tra thành công, xóa các tài nguyên đã triển khai để tránh mất phí aws
-    ```bash
-    terraform destroy
-    ```
-## 2. Cấu hình VPC bằng CloudFormation
-  + Sử dụng AWS CLI
-  + Cấu hình aws configure với AWS Access Key ID, AWS Secret Access Key, Default region name (ap-southeast-2), Default output format.
-  + Chạy lệnh:
-  ```bash
-  aws cloudformation create-stack --stack-name MyVPC --template-body file://CloudFormation_VPC.yaml
-  ```
-  để tạo stack trên CloudFormation.
-  + Sau đó kiểm tra tiến trình tạo stack bằng lệnh:
-  ```bash
-  aws cloudformation describe-stacks --stack-name MyVPC
-  ```
+3. **Tích hợp Checkov kiểm tra bảo mật**:
+   - Tích hợp `Checkov` trong GitHub Actions để kiểm tra:
+     - Tính tuân thủ bảo mật mã Terraform.
+     - Báo cáo các vấn đề tiềm ẩn và lỗi cấu hình bảo mật.
+   - Sử dụng action `bridgecrewio/checkov-action`.
+
+---
+
+## **2. Triển khai hạ tầng AWS với CloudFormation và tự động hóa với AWS CodePipeline (3 điểm)**
+
+### **Các bước thực hiện**
+1. **Dùng CloudFormation để triển khai hạ tầng AWS**:
+   - Tạo tệp CloudFormation `infrastructure.yaml` để định nghĩa:
+     - **VPC**, **Route Tables**, **NAT Gateway**, **EC2**, **Security Groups**.
+   - Triển khai stack bằng AWS Management Console hoặc CLI.
+
+2. **Kiểm tra mã CloudFormation với CodeBuild**:
+   - Sử dụng `cfn-lint` để kiểm tra tính đúng đắn của mã.
+   - Tích hợp `Taskcat` để kiểm thử các mẫu CloudFormation trên các môi trường thực tế.
+
+3. **Tự động hóa với AWS CodePipeline**:
+   - Tạo pipeline trong AWS CodePipeline với các giai đoạn:
+     - **Source**: Lấy mã nguồn từ AWS CodeCommit.
+     - **Build**: Sử dụng AWS CodeBuild để kiểm tra mã và build.
+     - **Deploy**: Triển khai hạ tầng lên AWS.
+
+---
+
+## **3. Sử dụng Jenkins để quản lý quy trình CI/CD cho ứng dụng microservices (4 điểm)**
+
+### **Các bước thực hiện**
+1. **Tự động hóa với Jenkins**:
+   - Tạo pipeline trong Jenkins để tự động hóa các bước:
+     - Clone mã nguồn từ GitHub.
+     - Build Docker image từ Dockerfile.
+     - Push image lên Docker Hub.
+     - Deploy ứng dụng lên Kubernetes hoặc Docker Compose.
+
+2. **Tích hợp SonarQube kiểm tra chất lượng mã**:
+   - Cấu hình SonarQube để:
+     - Phát hiện bugs, vulnerabilities, và code smells.
+     - Tăng cường độ sạch và bảo trì của mã.
+   - Sử dụng Jenkinsfile với stage:
+     - Chạy lệnh `/opt/sonar-scanner/bin/sonar-scanner`.
+
+3. **Kiểm tra bảo mật với Snyk (Tùy chọn)**:
+   - Tích hợp `Snyk` vào pipeline Jenkins để kiểm tra:
+     - Dependencies (Node.js, Python...).
+     - Dockerfile và cấu hình Docker Compose.
+   - Chạy các lệnh `snyk test` và `snyk container test` để phát hiện các lỗ hổng bảo mật.
